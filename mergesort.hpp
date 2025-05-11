@@ -2,8 +2,7 @@
 #define MERGESORT_HPP
 
 #include <string>
-#include <cstddef>
 
-void mergesortExterno(const std::string& archivoEntrada, const std::string& archivoSalida, size_t memoriaMaxima, size_t bloqueTamano);
+void mergesortExterno(const std::string& input_file, const std::string& output_file, size_t& io_count);
 
-#endif //MERGESORT_HPP
+#endif // MERGESORT_HPP

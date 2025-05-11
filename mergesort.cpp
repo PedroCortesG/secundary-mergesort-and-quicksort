@@ -1,176 +1,147 @@
 #include <iostream>
-#include <fstream>
 #include <vector>
-#include <string>
-#include <queue>
+#include <cmath>
 #include <cstdio>
+#include <string>
 #include <algorithm>
-#include <limits>
+#include <queue>
+#include "utils.hpp"
 
 using namespace std;
 
-// Parámetros globales
-int M = 1024; // Tamaño de memoria en enteros
-int B = 4098;  // Tamaño de bloque en enteros
-int K;        // Aridad máxima para merge: M / B - 1
-
-// Leer hasta 'cantidad' enteros desde archivo binario
-vector<int> leerEnteros(ifstream& in, int cantidad) {
-    vector<int> buffer(cantidad);
-    in.read(reinterpret_cast<char*>(buffer.data()), cantidad * sizeof(int));
-    buffer.resize(in.gcount() / sizeof(int)); // ajustar si leyó menos
-    return buffer;
-}
-
-// Escribir enteros a archivo binario
-void escribirEnteros(ofstream& out, const vector<int>& datos) {
-    out.write(reinterpret_cast<const char*>(datos.data()), datos.size() * sizeof(int));
-}
-
-// Paso 1: Crear runs iniciales de tamaño M
-vector<string> crearRunsIniciales(const string& archivoEntrada) {
-    ifstream in(archivoEntrada, ios::binary);
-    vector<string> nombresRuns;
-    int runId = 0;
-
-    while (!in.eof()) {
-        vector<int> buffer = leerEnteros(in, M);
-        if (buffer.empty()) break;
-        sort(buffer.begin(), buffer.end());
-
-        string nombreRun = "run_" + to_string(runId++) + ".bin";
-        ofstream out(nombreRun, ios::binary);
-        escribirEnteros(out, buffer);
-        out.close();
-
-        nombresRuns.push_back(nombreRun);
+void create_sorted_partitions(const string& input_file, int a, vector<string>& partition_names, size_t& io_count) {
+    FILE* in = fopen(input_file.c_str(), "rb");
+    if (!in) {
+        cerr << "No se pudo abrir archivo de entrada.\n";
+        exit(1);
     }
 
-    in.close();
-    return nombresRuns;
-}
+    int* buffer = new int[INTS_PER_BLOCK];
+    size_t total_read = 0;
+    int part_id = 0;
 
-// Paso 2: Fusionar K archivos ordenados en uno
-void fusionarKArchivos(const vector<string>& archivos, const string& archivoSalida) {
-    int k = archivos.size();
-    vector<ifstream> inputs(k);
-    vector<vector<int>> buffers(k);
-    vector<int> indices(k, 0);
-    ofstream out(archivoSalida, ios::binary);
-    vector<int> bufferOut;
+    while (true) {
+        vector<int> chunk;
+        int read_count = 0;
+        while (read_count < a * INTS_PER_BLOCK) {
+            int r = fread(buffer, INT_SIZE, INTS_PER_BLOCK, in);
+            if (r <= 0) break;
+            io_count++;
+            chunk.insert(chunk.end(), buffer, buffer + r);
+            read_count += r;
+        }
+        if (chunk.empty()) break;
 
-    // Abrir y cargar buffers iniciales
-    for (int i = 0; i < k; ++i) {
-        inputs[i].open(archivos[i], ios::binary);
-        buffers[i] = leerEnteros(inputs[i], B);
+        sort(chunk.begin(), chunk.end());
+
+        string part_name = "partition_" + to_string(part_id++) + ".bin";
+        partition_names.push_back(part_name);
+
+        FILE* out = fopen(part_name.c_str(), "wb");
+        for (size_t i = 0; i < chunk.size(); i += INTS_PER_BLOCK) {
+            int count = min((size_t)INTS_PER_BLOCK, chunk.size() - i);
+            write_block(&chunk[i], count, out, io_count);
+        }
+        fclose(out);
     }
 
-    // Cola de prioridad (min-heap): (valor, índice_archivo)
-    auto cmp = [](pair<int, int> a, pair<int, int> b) { return a.first > b.first; };
-    priority_queue<pair<int, int>, vector<pair<int, int>>, decltype(cmp)> pq(cmp);
+    delete[] buffer;
+    fclose(in);
+}
+
+struct HeapItem {
+    int value;
+    int file_index;
+
+    bool operator>(const HeapItem& other) const {
+        return value > other.value;
+    }
+};
+
+void merge_partitions(const vector<string>& partition_names, const string& output_file, size_t& io_count) {
+    int k = partition_names.size();
+    vector<FILE*> files(k);
+    vector<int*> buffers(k);
+    vector<int> buffer_sizes(k, 0);
+    vector<int> buffer_pos(k, 0);
 
     for (int i = 0; i < k; ++i) {
-        if (indices[i] < buffers[i].size())
-            pq.push({buffers[i][indices[i]++], i});
+        files[i] = fopen(partition_names[i].c_str(), "rb");
+        buffers[i] = new int[INTS_PER_BLOCK];
+        buffer_sizes[i] = fread(buffers[i], INT_SIZE, INTS_PER_BLOCK, files[i]);
+        io_count++;
     }
 
-    while (!pq.empty()) {
-        auto [valor, i] = pq.top(); pq.pop();
-        bufferOut.push_back(valor);
+    FILE* out = fopen(output_file.c_str(), "wb");
+    int* out_buffer = new int[INTS_PER_BLOCK];
+    int out_pos = 0;
 
-        if (bufferOut.size() == B) {
-            escribirEnteros(out, bufferOut);
-            bufferOut.clear();
-        }
+    auto cmp = greater<HeapItem>();
+    priority_queue<HeapItem, vector<HeapItem>, decltype(cmp)> heap(cmp);
 
-        if (indices[i] == buffers[i].size()) {
-            buffers[i] = leerEnteros(inputs[i], B);
-            indices[i] = 0;
-        }
-
-        if (!buffers[i].empty()) {
-            pq.push({buffers[i][indices[i]++], i});
+    for (int i = 0; i < k; ++i) {
+        if (buffer_sizes[i] > 0) {
+            heap.push({buffers[i][0], i});
+            buffer_pos[i] = 1;
         }
     }
 
-    if (!bufferOut.empty()) {
-        escribirEnteros(out, bufferOut);
-    }
+    while (!heap.empty()) {
+        auto [val, idx] = heap.top();
+        heap.pop();
+        out_buffer[out_pos++] = val;
 
-    // Cerrar archivos
-    for (auto& f : inputs) f.close();
-    out.close();
-}
-
-// Paso 3: MergeSort externo completo
-void mergeSortExterno(const string& archivoEntrada, const string& archivoSalida) {
-    vector<string> runs = crearRunsIniciales(archivoEntrada);
-    int nivel = 0;
-
-    while (runs.size() > 1) {
-        vector<string> nuevosRuns;
-        for (size_t i = 0; i < runs.size(); i += K) {
-            vector<string> grupo;
-            for (int j = 0; j < K && i + j < runs.size(); ++j)
-                grupo.push_back(runs[i + j]);
-
-            string nuevoRun = "nivel" + to_string(nivel) + "_run_" + to_string(nuevosRuns.size()) + ".bin";
-            fusionarKArchivos(grupo, nuevoRun);
-            nuevosRuns.push_back(nuevoRun);
+        if (out_pos == INTS_PER_BLOCK) {
+            write_block(out_buffer, INTS_PER_BLOCK, out, io_count);
+            out_pos = 0;
         }
 
-        // Borrar runs anteriores
-        for (const string& r : runs)
-            remove(r.c_str());
+        if (buffer_pos[idx] == buffer_sizes[idx]) {
+            buffer_sizes[idx] = fread(buffers[idx], INT_SIZE, INTS_PER_BLOCK, files[idx]);
+            io_count++;
+            buffer_pos[idx] = 0;
+        }
 
-        runs = nuevosRuns;
-        nivel++;
+        if (buffer_sizes[idx] > 0) {
+            heap.push({buffers[idx][buffer_pos[idx]++], idx});
+        }
     }
 
-    rename(runs[0].c_str(), archivoSalida.c_str());
-}
+    if (out_pos > 0) write_block(out_buffer, out_pos, out, io_count);
 
-// Utilidad para crear un archivo binario de prueba
-void generarArchivoAleatorio(const string& nombre, int n) {
-    ofstream out(nombre, ios::binary);
-    for (int i = 0; i < n; ++i) {
-        int valor = rand() % 10000;
-        out.write(reinterpret_cast<char*>(&valor), sizeof(int));
+    for (int i = 0; i < k; ++i) {
+        fclose(files[i]);
+        delete[] buffers[i];
     }
-    out.close();
+
+    delete[] out_buffer;
+    fclose(out);
 }
 
-// Utilidad para imprimir archivo binario
-void imprimirArchivo(const string& nombre) {
-    ifstream in(nombre, ios::binary);
-    int valor;
-    while (in.read(reinterpret_cast<char*>(&valor), sizeof(int))) {
-        cout << valor << " ";
+void mergesortExterno(const string& input_file, const string& output_file, size_t& io_count) {
+    size_t num_ints = count_ints_in_file(input_file);
+    size_t num_blocks = (num_ints + INTS_PER_BLOCK - 1) / INTS_PER_BLOCK;
+    int a = max(2, (int)sqrt(num_blocks));  // como indica el enunciado
+
+    vector<string> partition_names;
+    create_sorted_partitions(input_file, a, partition_names, io_count);
+    merge_partitions(partition_names, output_file, io_count);
+
+    // Elimina archivos temporales
+    for (const auto& name : partition_names) {
+        remove(name.c_str());
     }
-    cout << endl;
-    in.close();
 }
 
-// main para pruebas
 int main(int argc, char* argv[]) {
-    if (argc != 4) {
-        cerr << "Uso: ./mergesort <archivo_entrada> <archivo_salida> <n_elementos>" << endl;
+    if (argc != 3) {
+        cerr << "Uso: ./mergesort <archivo_entrada> <archivo_salida>\n";
         return 1;
     }
 
-    string archivoEntrada = argv[1];
-    string archivoSalida = argv[2];
-    int n = stoi(argv[3]);
+    size_t io_count = 0;
+    mergesortExterno(argv[1], argv[2], io_count);
 
-    // Calcular K
-    K = M / B - 1;
-
-    // generarArchivoAleatorio(archivoEntrada, n); // Solo si necesitas generar datos de prueba
-
-    mergeSortExterno(archivoEntrada, archivoSalida);
-
-    cout << "Archivo ordenado generado: " << archivoSalida << endl;
-    // imprimirArchivo(archivoSalida); // Descomenta si quieres ver los resultados
-
+    cout << "Total de accesos a disco: " << io_count << "\n";
     return 0;
 }

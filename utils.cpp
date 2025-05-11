@@ -1,37 +1,24 @@
 #include "utils.hpp"
-#include <fstream>
-#include <random>
-#include <iostream>
+#include <cstdio>
 
-void generarArchivoBinario(const std::string& filename, size_t cantidad) {
-    std::ofstream out(filename, std::ios::binary);
-    std::mt19937 rng(std::random_device{}());
-    std::uniform_int_distribution<uint32_t> dist(0, UINT32_MAX);
+int read_block(int* buffer, FILE* file, size_t& io_count) {
+    int read = fread(buffer, INT_SIZE, INTS_PER_BLOCK, file);
+    if (read > 0) ++io_count;
+    return read;
+}
 
-    for (size_t i = 0, i < cantidad; i++) {
-        uint32_t numero = dist(rng);
-        out.write(reinterpret_cast<const char*>(&numero), sizeof(numero));
+void write_block(const int* buffer, int count, FILE* file, size_t& io_count) {
+    if (count > 0) {
+        fwrite(buffer, INT_SIZE, count, file);
+        ++io_count;
     }
 }
 
-std::vector<uint32_t> leerBloque(std::ifstream& in, size_t cantidad) {
-    std::vector<uint32_t> datos(cantidad);
-    in.read(reinterpret_cast<char*>(datos.data()), cantidad * sizeof(uint32_t));
-    buffer.resize(in.gcount() / sizeof(uint32_t));
-    return buffer;
-}
-
-void escribirBloque(std::ofstream& out, const std::vector<uint32_t>& datos) {
-    out.write(reinterpret_cast<const char*>(datos.data()), datos.size() * sizeof(uint32_t));
-}
-
-void imprimirArchivoBinario(const std::string& filename, size_t max_elementos) {
-    std::ifstream in(filename, std::ios::binary);
-    uint32_t val;
-    size_t count = 0;
-    while (in.read(reinterpret_cast<char*>(&val), sizeof(val)) && count < max_elementos) {
-        std::cout << val << " ";
-        ++count;
-    }
-    std::cout << std::endl;
+size_t count_ints_in_file(const std::string& filename) {
+    FILE* file = fopen(filename.c_str(), "rb");
+    if (!file) return 0;
+    fseek(file, 0, SEEK_END);
+    size_t bytes = ftell(file);
+    fclose(file);
+    return bytes / INT_SIZE;
 }
