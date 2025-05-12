@@ -112,6 +112,15 @@ void quicksort_externo(const std::string &archivoEntrada, const std::string &arc
     dividirArchivo(archivoEntrada, pivote, menores, mayores);
     size_t cantidadPivotes = contarPivotes(archivoEntrada, pivote);
 
+    if (cantidadPivotes == cantidad) {
+        std::ofstream salida(archivoSalida, std::ios::binary);
+        for (size_t i = 0; i < cantidadPivotes; ++i) {
+            write_int(salida, pivote);
+        }
+        salida.close();
+        return;
+    }
+
     // Validar si los archivos menores y mayores están vacíos
     std::ifstream archivoMenores(menores, std::ios::binary | std::ios::ate);
     std::ifstream archivoMayores(mayores, std::ios::binary | std::ios::ate);
