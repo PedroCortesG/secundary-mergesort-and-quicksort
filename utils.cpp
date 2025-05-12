@@ -3,7 +3,7 @@
 #include <cstring>
 
 size_t B = 1024;
-size_t M = (50 * 1024 * 1024) / sizeof(int64_t)
+size_t M = (50 * 1024 * 1024) / sizeof(int64_t);
 
 size_t disk_reads = 0;
 size_t disk_writes = 0;
