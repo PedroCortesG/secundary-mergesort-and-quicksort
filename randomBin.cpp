@@ -35,7 +35,7 @@ int main() {
         size_t M = (50 * 1024 * 1024) / sizeof(int64_t);
         // Todos juntos toma mucho espacio
         //std::vector<size_t> tamanos = {4 * M, 8 * M, 12 * M, 16 * M, 20 * M, 24 * M, 28 * M, 32 * M, 36 * M, 40 * M, 44 * M, 48 * M, 52 * M, 56 * M, 60 * M};
-        std::vector<size_t> tamanos = {4 * M, 8 * M, 12 * M, 16 * M, 20 * M}; // Para pruebas rápidas
+        std::vector<size_t> tamanos = {4 * M, 8 * M}; // Para pruebas rápidas
         for (size_t tamano : tamanos) {
             for (int i = 0; i < 5; ++i) { // Generar 5 secuencias por tamaño
                 std::vector<int64_t> secuencia = generarSecuencia(tamano);
