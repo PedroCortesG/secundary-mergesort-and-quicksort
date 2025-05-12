@@ -94,7 +94,6 @@ void quicksort_externo(const std::string &archivoEntrada, const std::string &arc
     size_t cantidad = tamano / sizeof(int64_t);
 
     if (cantidad <= 1) {
-        // Copiar directamente si hay 0 o 1 elementos
         std::ofstream salida(archivoSalida, std::ios::binary);
         entrada.seekg(0);
         salida << entrada.rdbuf();
@@ -103,7 +102,6 @@ void quicksort_externo(const std::string &archivoEntrada, const std::string &arc
         return;
     }
 
-    // Escoger pivote (el primero)
     int64_t pivote;
     entrada.read(reinterpret_cast<char *>(&pivote), sizeof(int64_t));
     entrada.close();
@@ -114,15 +112,37 @@ void quicksort_externo(const std::string &archivoEntrada, const std::string &arc
     dividirArchivo(archivoEntrada, pivote, menores, mayores);
     size_t cantidadPivotes = contarPivotes(archivoEntrada, pivote);
 
+    // Validar si los archivos menores y mayores están vacíos
+    std::ifstream archivoMenores(menores, std::ios::binary | std::ios::ate);
+    std::ifstream archivoMayores(mayores, std::ios::binary | std::ios::ate);
+    size_t tamanoMenores = archivoMenores.tellg();
+    size_t tamanoMayores = archivoMayores.tellg();
+    archivoMenores.close();
+    archivoMayores.close();
+
+    if (tamanoMenores == 0 && tamanoMayores == 0) {
+        std::ofstream salida(archivoSalida, std::ios::binary);
+        for (size_t i = 0; i < cantidadPivotes; ++i) {
+            write_int(salida, pivote);
+        }
+        salida.close();
+        fs::remove(menores);
+        fs::remove(mayores);
+        return;
+    }
+
     std::string menoresOrdenado = "run_" + std::to_string(run_counter++) + "_menores_ordenado.bin";
     std::string mayoresOrdenado = "run_" + std::to_string(run_counter++) + "_mayores_ordenado.bin";
 
-    quicksort_externo(menores, menoresOrdenado);
-    quicksort_externo(mayores, mayoresOrdenado);
+    if (tamanoMenores > 0) {
+        quicksort_externo(menores, menoresOrdenado);
+    }
+    if (tamanoMayores > 0) {
+        quicksort_externo(mayores, mayoresOrdenado);
+    }
 
     unirArchivos(archivoSalida, menoresOrdenado, pivote, cantidadPivotes, mayoresOrdenado);
 
-    // Borrar archivos temporales
     fs::remove(menores);
     fs::remove(mayores);
     fs::remove(menoresOrdenado);
