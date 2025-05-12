@@ -1,24 +1,45 @@
-#include "utils.hpp"
-#include <cstdio>
+#include "utils.h"
+#include <iostream>
+#include <cstring>
 
-int read_block(int* buffer, FILE* file, size_t& io_count) {
-    int read = fread(buffer, INT_SIZE, INTS_PER_BLOCK, file);
-    if (read > 0) ++io_count;
-    return read;
+size_t B = 1024;
+
+size_t disk_reads = 0;
+size_t disk_writes = 0;
+
+void reset_counters() {
+    disk_reads = 0;
+    disk_writes = 0;
 }
 
-void write_block(const int* buffer, int count, FILE* file, size_t& io_count) {
-    if (count > 0) {
-        fwrite(buffer, INT_SIZE, count, file);
-        ++io_count;
+std::vector<int> read_block(std::ifstream &file) {
+    std::vector<int> block(B);
+    file.read(reinterpret_cast<char *>(block.data()), B * sizeof(int));
+    size_t read_count = file.gcount() / sizeof(int);
+    block.resize(read_count);
+    if (read_count > 0) {
+        disk_reads++;
+    }
+    return block;
+}
+
+void write_block(std::ofstream &file, const std::vector<int> &block) {
+    file.write(reinterpret_cast<const char *>(block.data()), block.size() * sizeof(int));
+    if (!block.empty()) {
+        disk_writes++;
     }
 }
 
-size_t count_ints_in_file(const std::string& filename) {
-    FILE* file = fopen(filename.c_str(), "rb");
-    if (!file) return 0;
-    fseek(file, 0, SEEK_END);
-    size_t bytes = ftell(file);
-    fclose(file);
-    return bytes / INT_SIZE;
+void write_int(std::ofstream &file, int value) {
+    file.write(reinterpret_cast<const char *>(&value), sizeof(int));
+    disk_writes++;
+}
+
+bool read_int(std::ifstream &file, int &value) {
+    file.read(reinterpret_cast<char *>(&value), sizeof(int));
+    if (file.gcount() == sizeof(int)) {
+        disk_reads++;
+        return true;
+    }
+    return false;
 }
