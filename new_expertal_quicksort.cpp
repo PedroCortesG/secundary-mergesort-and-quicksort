@@ -5,7 +5,6 @@
 #include <string>
 #include <random>
 #include <cstdio>
-#include <unordered_map>
 #include <unordered_set>
 #include "utils.h"
 
@@ -13,14 +12,11 @@ using namespace std;
 
 const int a = 100; // número de particiones (modificable)
 
-
 size_t get_file_size(const std::string &filename) {
     std::ifstream in(filename, std::ios::binary | std::ios::ate);
-    return in.tellg(); // Retorna posición final = tamaño
+    return in.tellg();
 }
 
-
-// Elige a-1 pivotes aleatorios desde un bloque del archivo
 vector<int> choose_pivots(const string& filename) {
     ifstream fin(filename, ios::binary);
     vector<int> buffer(M);
@@ -28,13 +24,11 @@ vector<int> choose_pivots(const string& filename) {
     random_device rd;
     mt19937 gen(rd());
 
-    // Lee un bloque aleatorio
     int total_blocks = get_file_size(filename) / (M * sizeof(int));
     int block_index = gen() % max(total_blocks, 1);
     fin.seekg(block_index * M * sizeof(int));
     fin.read(reinterpret_cast<char*>(buffer.data()), M * sizeof(int));
 
-    // Selecciona a-1 elementos aleatorios
     vector<int> pivots;
     unordered_set<int> chosen;
     while ((int)pivots.size() < a - 1) {
@@ -47,14 +41,12 @@ vector<int> choose_pivots(const string& filename) {
     return pivots;
 }
 
-// Determina la partición a la que pertenece un valor dado los pivotes
 int get_partition(int value, const vector<int>& pivots) {
     int i = 0;
     while (i < (int)pivots.size() && value > pivots[i]) ++i;
     return i;
 }
 
-// Divide el archivo original en a archivos temporales según los pivotes
 vector<string> partition_file(const string& filename, const vector<int>& pivots) {
     ifstream fin(filename, ios::binary);
     vector<ofstream> tmp_files(a);
@@ -78,7 +70,6 @@ vector<string> partition_file(const string& filename, const vector<int>& pivots)
     return tmp_names;
 }
 
-// Ordena un archivo pequeño que cabe en memoria
 void sort_small_file(const string& filename) {
     ifstream fin(filename, ios::binary);
     vector<int> buffer;
@@ -97,7 +88,6 @@ void sort_small_file(const string& filename) {
     fout.close();
 }
 
-// Concatenar archivos en uno solo
 void concatenate_files(const vector<string>& files, const string& output) {
     ofstream fout(output, ios::binary | ios::trunc);
     vector<int> buffer(M);
@@ -125,13 +115,16 @@ void external_quicksort(const string& filename) {
     vector<string> parts = partition_file(filename, pivots);
 
     for (const string& part : parts) {
-        external_quicksort(part);
+        if (get_file_size(part) > 0) {
+            external_quicksort(part);
+        } else {
+            remove(part.c_str());
+        }
     }
 
     concatenate_files(parts, filename);
 }
 
-// main de ejemplo para probar
 int main(int argc, char** argv) {
     if (argc != 2) {
         cerr << "Uso: " << argv[0] << " <archivo>" << endl;
