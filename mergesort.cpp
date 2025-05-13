@@ -7,6 +7,7 @@
 #include <iostream>
 #include <algorithm>
 #include <filesystem>
+#include <chrono>
 
 namespace fs = std::filesystem;
 
@@ -38,9 +39,9 @@ std::vector<std::string> create_initial_runs(const std::string &input_file) {
     return runs;
 }
 
-// Mezcla K runs ordenados (K = M / B - 1)
+// Mezcla K runs ordenados
 std::string merge_runs(const std::vector<std::string> &runs) {
-    using HeapNode = std::pair<int, size_t>; // (valor, índice del run)
+    using HeapNode = std::pair<int, size_t>;
     auto cmp = [](HeapNode a, HeapNode b) { return a.first > b.first; };
     std::priority_queue<HeapNode, std::vector<HeapNode>, decltype(cmp)> heap(cmp);
 
@@ -82,8 +83,13 @@ std::string merge_runs(const std::vector<std::string> &runs) {
     return output_file;
 }
 
+// Función principal con medición de tiempo y reportes
 void external_mergesort(const std::string &input_file, const std::string &output_file) {
+    using namespace std::chrono;
+
     reset_counters();
+    auto start = high_resolution_clock::now();
+
     std::vector<std::string> runs = create_initial_runs(input_file);
 
     while (runs.size() > 1) {
@@ -99,4 +105,11 @@ void external_mergesort(const std::string &input_file, const std::string &output
     if (!runs.empty()) {
         fs::rename(runs[0], output_file);
     }
+
+    auto end = high_resolution_clock::now();
+    auto duration_ms = duration_cast<milliseconds>(end - start).count();
+
+    std::cout << "Tiempo total: " << duration_ms << " ms" << std::endl;
+    std::cout << "Lecturas de disco: " << get_read_count() << std::endl;
+    std::cout << "Escrituras de disco: " << get_write_count() << std::endl;
 }

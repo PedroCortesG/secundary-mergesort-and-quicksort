@@ -45,3 +45,10 @@ bool read_int(std::ifstream &file, int &value) {
     }
     return false;
 }
+
+size_t get_read_count() {
+    return disk_reads;
+}
+size_t get_write_count() {
+    return disk_writes;
+}

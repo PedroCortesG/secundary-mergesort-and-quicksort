@@ -28,4 +28,10 @@ void write_int(std::ofstream &file, int value);
 // Lee un entero en binario
 bool read_int(std::ifstream &file, int &value);
 
+// Devuelve el número de lecturas de disco
+size_t get_read_count();
+
+// Devuelve el número de escrituras de disco
+size_t get_write_count();
+
 #endif // UTILS_H
