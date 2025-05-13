@@ -1,6 +1,6 @@
 #include "utils.h"
+#include <cstdint>
 #include <iostream>
-#include <cstring>
 
 size_t B = 4096; //Sacado con el comando especificado en el foro
 size_t M = (50 * 1024 * 1024) / sizeof(int64_t); //(50MB)

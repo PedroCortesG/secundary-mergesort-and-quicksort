@@ -9,7 +9,6 @@ namespace fs = std::filesystem;
 
 int run_counter = 0; // Define run_counter globally
 
-// Divide el archivo de entrada en menores y mayores/iguales al pivote
 void dividirArchivo(const std::string &archivoEntrada, int64_t pivote,
                     const std::string &archivoMenores, const std::string &archivoMayores) {
     std::ifstream entrada(archivoEntrada, std::ios::binary);
@@ -33,7 +32,6 @@ void dividirArchivo(const std::string &archivoEntrada, int64_t pivote,
     mayores.close();
 }
 
-// Cuenta cuántas veces aparece el pivote
 size_t contarPivotes(const std::string &archivoEntrada, int64_t pivote) {
     std::ifstream entrada(archivoEntrada, std::ios::binary);
     size_t conteo = 0;
@@ -52,7 +50,6 @@ size_t contarPivotes(const std::string &archivoEntrada, int64_t pivote) {
     return conteo;
 }
 
-// Une los archivos ordenados menores, pivotes y mayores
 void unirArchivos(const std::string &archivoSalida,
                   const std::string &archivoMenores, int64_t pivote, size_t repeticiones,
                   const std::string &archivoMayores) {
@@ -62,19 +59,16 @@ void unirArchivos(const std::string &archivoSalida,
 
     std::vector<int> buffer;
 
-    // Escribir menores
     buffer = read_block(menores);
     while (!buffer.empty()) {
         write_block(salida, buffer);
         buffer = read_block(menores);
     }
 
-    // Escribir pivotes
     for (size_t i = 0; i < repeticiones; ++i) {
         write_int(salida, pivote);
     }
 
-    // Escribir mayores
     buffer = read_block(mayores);
     while (!buffer.empty()) {
         write_block(salida, buffer);
@@ -86,7 +80,6 @@ void unirArchivos(const std::string &archivoSalida,
     mayores.close();
 }
 
-// Quicksort externo recursivo
 void quicksort_externo(const std::string &archivoEntrada, const std::string &archivoSalida) {
     std::ifstream entrada(archivoEntrada, std::ios::binary | std::ios::ate);
     size_t tamano = entrada.tellg();
@@ -118,10 +111,10 @@ void quicksort_externo(const std::string &archivoEntrada, const std::string &arc
             write_int(salida, pivote);
         }
         salida.close();
+        fs::remove(archivoEntrada);
         return;
     }
 
-    // Validar si los archivos menores y mayores están vacíos
     std::ifstream archivoMenores(menores, std::ios::binary | std::ios::ate);
     std::ifstream archivoMayores(mayores, std::ios::binary | std::ios::ate);
     size_t tamanoMenores = archivoMenores.tellg();
