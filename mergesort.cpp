@@ -19,8 +19,8 @@ std::vector<std::string> create_initial_runs(const std::string &input_file) {
     std::ifstream input(input_file, std::ios::binary);
 
     while (!input.eof()) {
-        std::vector<int> buffer;
-        int value;
+        std::vector<int64_t> buffer;
+        int64_t value;
         for (size_t i = 0; i < M && read_int(input, value); ++i) {
             buffer.push_back(value);
         }
@@ -41,13 +41,13 @@ std::vector<std::string> create_initial_runs(const std::string &input_file) {
 
 // Mezcla K runs ordenados
 std::string merge_runs(const std::vector<std::string> &runs) {
-    using HeapNode = std::pair<int, size_t>;
+    using HeapNode = std::pair<int64_t, size_t>;
     auto cmp = [](HeapNode a, HeapNode b) { return a.first > b.first; };
     std::priority_queue<HeapNode, std::vector<HeapNode>, decltype(cmp)> heap(cmp);
 
     size_t K = runs.size();
     std::vector<std::ifstream> run_streams(K);
-    std::vector<int> current(K);
+    std::vector<int64_t> current(K);
     std::vector<bool> has_value(K, false);
 
     for (size_t i = 0; i < K; ++i) {
