@@ -3,6 +3,6 @@
 
 #include <string>
 
-void external_mergesort(const std::string &input_file, const std::string &output_file);
+void external_mergesort(const std::string &input_file, const std::string &output_file, size_t a);
 
 #endif // MERGESORT_H

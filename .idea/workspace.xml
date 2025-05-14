@@ -19,7 +19,11 @@
     <option name="reloaded" value="true" />
   </component>
   <component name="CMakeRunConfigurationManager">
-    <generated />
+    <generated>
+      <config projectName="ExternalSorts" targetName="quicksort_exec" />
+      <config projectName="ExternalSorts" targetName="run_all" />
+      <config projectName="ExternalSorts" targetName="mergesort_exec" />
+    </generated>
   </component>
   <component name="CMakeSettings">
     <configurations>
@@ -87,6 +91,21 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="mergesort_exec" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ExternalSorts" TARGET_NAME="mergesort_exec" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="ExternalSorts" RUN_TARGET_NAME="mergesort_exec">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="quicksort_exec" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ExternalSorts" TARGET_NAME="quicksort_exec" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="ExternalSorts" RUN_TARGET_NAME="quicksort_exec">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="run_all" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ExternalSorts" TARGET_NAME="run_all" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="ExternalSorts" RUN_TARGET_NAME="run_all">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="main.cpp" type="CppFileRunConfiguration" factoryName="CppFileRunConfiguration" temporary="true" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Tarea 1 logaritmos" TARGET_NAME="main.cpp" CONFIG_NAME="main.cpp">
       <option name="sourceFile" value="main.cpp" />
       <method v="2">
@@ -111,6 +130,15 @@
         <option name="com.jetbrains.cidr.cpp.runfile.CppFileBuildBeforeRunTaskProvider$BasicBuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="C/C++ File.main.cpp" />
+      <item itemvalue="C/C++ File.mergesort.cpp" />
+      <item itemvalue="C/C++ File.quicksort.cpp" />
+      <item itemvalue="C/C++ File.randomBin.cpp" />
+      <item itemvalue="CMake Application.mergesort_exec" />
+      <item itemvalue="CMake Application.quicksort_exec" />
+      <item itemvalue="CMake Application.run_all" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="C/C++ File.main.cpp" />
@@ -137,7 +165,7 @@
       <workItem from="1746986339921" duration="15024000" />
       <workItem from="1747086976532" duration="9537000" />
       <workItem from="1747158900602" duration="4861000" />
-      <workItem from="1747178335624" duration="7759000" />
+      <workItem from="1747178335624" duration="8542000" />
     </task>
     <servers />
   </component>

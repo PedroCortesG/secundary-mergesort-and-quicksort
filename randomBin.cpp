@@ -27,21 +27,27 @@ void guardarEnBinario(const std::string& nombreArchivo, const std::vector<int64_
     archivo.close();
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     try {
-        // Tamaños de las secuencias en múltiplos de M
+        if (argc != 2) {
+            throw std::invalid_argument("Uso: " + std::string(argv[0]) + " <N>");
+        }
+
+        // Convertir el argumento a un número
+        size_t N = std::stoul(argv[1]);
+
+        // Tamaño base en múltiplos de M
         size_t M = (50 * 1024 * 1024) / sizeof(int64_t);
-        std::vector<size_t> tamanos = {4 * M, 8 * M}; // Para pruebas rápidas
-        for (size_t tamano : tamanos) {
-            for (int i = 0; i < 5; ++i) { // Generar 5 secuencias por tamaño
-                std::vector<int64_t> secuencia = generarNumerosAleatorios(tamano);
+        size_t tamano = N * M;
 
-                // Crear un nombre único para cada archivo
-                std::string nombreArchivo = "secuencia_" + std::to_string(tamano / M) + "M_" + std::to_string(i) + ".bin";
-                guardarEnBinario(nombreArchivo, secuencia);
+        for (int i = 0; i < 5; ++i) { // Generar 5 secuencias
+            std::vector<int64_t> secuencia = generarNumerosAleatorios(tamano);
 
-                std::cout << "Archivo generado: " << nombreArchivo << std::endl;
-            }
+            // Crear un nombre único para cada archivo
+            std::string nombreArchivo = "secuencia_" + std::to_string(N) + "M_" + std::to_string(i) + ".bin";
+            guardarEnBinario(nombreArchivo, secuencia);
+
+            std::cout << "Archivo generado: " << nombreArchivo << std::endl;
         }
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
