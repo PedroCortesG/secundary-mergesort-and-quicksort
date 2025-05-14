@@ -1,1 +1,0 @@
-CMakeLists.txt not found in C:\Users\Pedro\Documents\Tarea 1 logaritmos Select CMakeLists.txt
