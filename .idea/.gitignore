@@ -11,3 +11,10 @@
 /*.bin
 
 .gitignore
+
+
+#ignore .idea in root directory
+.idea/
+
+#ignore cmake in root directory
+/cmake-build-debug/
