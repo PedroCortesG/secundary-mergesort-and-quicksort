@@ -1,6 +1,8 @@
 #include "mergesort.h"
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <chrono>
 
 
 /**
@@ -26,6 +28,34 @@ int main(int argc, char *argv[]) {
 
     std::string archivoEntrada = argv[1];
     std::string archivoSalida = argv[2];
+
+    if (true) {
+        std::ofstream logFile("tiempos_mergesort.txt");
+        if (!logFile) {
+            std::cerr << "Error al crear el archivo de log." << std::endl;
+            return 1;
+        }
+
+        try {
+            for (size_t a = 2; a <= 512; ++a) {
+                auto start = std::chrono::high_resolution_clock::now();
+
+                std::cout << "Ejecutando external_mergesort con a = " << a << std::endl;
+                external_mergesort(archivoEntrada, archivoSalida, a);
+
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+                std::cout << "Archivo ordenado generado con a = " << a << ": " << archivoSalida << std::endl;
+                logFile << "a = " << a << ", tiempo = " << duration << " ms" << std::endl;
+            }
+        } catch (const std::exception &e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+            return 1;
+        }
+
+        logFile.close();
+    }
 
     try {
         external_mergesort(archivoEntrada, archivoSalida, 50); // Se puede cambiar a.

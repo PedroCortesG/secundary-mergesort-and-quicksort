@@ -2,7 +2,7 @@
 ## Requisitos previos
 - Tener instalado un compilador de C++ (por ejemplo, g++).
 
-## Uso
+## Uso mergesort
 1. compilar: g++ -std=c++17 main.cpp  mergesort.cpp utils.cpp -o mergesort
 2. ejecutar: ./mergesort archivo_entrada.bin nombre_archivo_salida.bin
 
@@ -10,4 +10,4 @@
 1. compilar: g++ -std=c++17 randomBin.cpp utils.cpp -o randomBin
 2. ejecutar: ./randomBin N
 
-donde N es cualquiera de los especificados en el enunciado o en la documentacion del codigo.
+donde N es cualquiera de los especificados en el enunciado de la tarea.
