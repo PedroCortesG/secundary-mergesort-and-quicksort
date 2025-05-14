@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     std::string archivoSalida = argv[2];
 
     try {
-        external_mergesort(archivoEntrada, archivoSalida);
+        external_mergesort(archivoEntrada, archivoSalida, a = 2); // Se puede cambiar a.
         std::cout << "Archivo ordenado generado: " << archivoSalida << std::endl;
     } catch (const std::exception &e) {
         std::cerr << "Error: " << e.what() << std::endl;
