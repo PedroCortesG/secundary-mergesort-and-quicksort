@@ -38,6 +38,8 @@ size_t classify(int64_t value, const std::vector<int64_t> &pivots) {
 
 // Quicksort externo
 void external_quicksort(const std::string &input_file, const std::string &output_file) {
+    auto start = std::chrono::high_resolution_clock::now(); // Start time measurement
+
     std::ifstream input(input_file, std::ios::binary | std::ios::ate);
     size_t file_size = input.tellg();
     size_t num_elements = file_size / sizeof(int64_t);
@@ -102,10 +104,12 @@ void external_quicksort(const std::string &input_file, const std::string &output
     }
 
     output.close();
+
+    auto end = std::chrono::high_resolution_clock::now(); // End time measurement
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     std::cout << "Tiempo total: " << ms << " ms\n";
     std::cout << "Lecturas de disco: " << get_read_count() << "\n";
     std::cout << "Escrituras de disco: " << get_write_count() << "\n";
-
 }
 
 int main(int argc, char *argv[]) {
@@ -118,7 +122,7 @@ int main(int argc, char *argv[]) {
     std::string archivoSalida = argv[2];
 
     try {
-        external_quicksort(archivoEntrada, archivoSalida); // Se puede cambiar a.
+        external_quicksort(archivoEntrada, archivoSalida);
         std::cout << "Archivo ordenado generado: " << archivoSalida << std::endl;
     } catch (const std::exception &e) {
         std::cerr << "Error: " << e.what() << std::endl;
@@ -127,4 +131,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
