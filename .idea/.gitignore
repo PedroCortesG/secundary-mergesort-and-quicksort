@@ -14,7 +14,7 @@
 
 
 #ignore .idea in root directory
-.idea/
+/.idea/
 
 #ignore cmake in root directory
 /cmake-build-debug/
